@@ -1,15 +1,17 @@
 import customtkinter as ctk
-from tkinter import messagebox   # los messagebox de tkinter normal siguen funcionando bien
+from tkinter import messagebox
 from modelos.cultivo import crear_cultivo
 from utils.validaciones import validar_cultivo
 
 
 class FormularioCultivo(ctk.CTkToplevel):
-    def __init__(self, padre):
+    def __init__(self, padre, al_guardar_callback=None):
         super().__init__(padre)
         self.title("Registrar Cultivo")
         self.geometry("380x280")
         self.resizable(False, False)
+
+        self.al_guardar_callback = al_guardar_callback
 
         self.var_nombre = ctk.StringVar()
         self.var_area = ctk.StringVar()
@@ -18,7 +20,6 @@ class FormularioCultivo(ctk.CTkToplevel):
         self._construir_formulario()
 
     def _construir_formulario(self):
-        # padding (padx/pady) más generoso: se ve mejor con el estilo redondeado
         ctk.CTkLabel(self, text="Registrar Cultivo", font=ctk.CTkFont(size=18, weight="bold")) \
             .grid(row=0, column=0, columnspan=2, padx=20, pady=(20, 15))
 
@@ -47,4 +48,8 @@ class FormularioCultivo(ctk.CTkToplevel):
 
         id_cultivo = crear_cultivo(nombre, area_num, ubicacion)
         messagebox.showinfo("Éxito", f"Cultivo registrado con ID {id_cultivo}")
+
+        if self.al_guardar_callback:
+            self.al_guardar_callback()  # avisa a la ventana principal que se actualice
+
         self.destroy()

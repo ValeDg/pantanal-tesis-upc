@@ -13,7 +13,7 @@ def crear_cultivo(nombre: str, area_ha: float, ubicacion: str) -> int:
         "INSERT INTO cultivos (nombre, area_ha, ubicacion) VALUES (?, ?, ?)",
         (nombre, area_ha, ubicacion)
     )
-    # cursor.lastrowid nos da el id que SQLite acaba de asignar (AUTOINCREMENT)
+# cursor.lastrowid da el id que SQLite acaba de asignar (AUTOINCREMENT)
     id_generado = cursor.lastrowid
 
     conexion.commit()

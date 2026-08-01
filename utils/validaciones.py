@@ -10,10 +10,10 @@ def validar_cultivo(nombre: str, area_texto: str, ubicacion: str):
     ubicacion = ubicacion.strip()
 
     if not nombre:
-        return False, "El nombre del cultivo es obligatorio.", None
+        return False, "El nombre del cultivo es obligatorio!!", None
 
     if not ubicacion:
-        return False, "La ubicación es obligatoria.", None
+        return False, "La ubicación es obligatoria!!", None
 
     try:
         area_num = float(area_texto)
@@ -32,7 +32,7 @@ def validar_fecha(fecha_texto: str):
         datetime.strptime(fecha_texto, "%Y-%m-%d")
         return True, ""
     except ValueError:
-        return False, "La fecha debe tener formato AAAA-MM-DD (ej: 2026-07-31)."
+        return False, "La fecha debe tener formato AAAA-MM-DD (ejem: 2026-07-31)."
 
 
 def validar_monitoreo(id_cultivo, fecha_texto, ruta_video, ruta_gps):
@@ -41,7 +41,7 @@ def validar_monitoreo(id_cultivo, fecha_texto, ruta_video, ruta_gps):
     Devuelve (es_valido: bool, mensaje_error: str)
     """
     if id_cultivo is None:
-        return False, "Debes seleccionar un cultivo."
+        return False, "Debes seleccionar un cultivo!!"
 
     valido_fecha, error_fecha = validar_fecha(fecha_texto)
     if not valido_fecha:
