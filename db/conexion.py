@@ -51,12 +51,25 @@ def inicializar_base_datos():
         )
     """)
 
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS usuarios (
+            id_usuario      INTEGER PRIMARY KEY AUTOINCREMENT,
+            nombre          TEXT NOT NULL,
+            correo          TEXT NOT NULL UNIQUE,
+            contrasena_hash TEXT NOT NULL,
+            rol             TEXT NOT NULL,
+            activo          INTEGER DEFAULT 1
+        )
+    """)
+
 # --- Migración: agrega la columna 'poligono' si todavía no existe ---
     # (necesario porque la tabla 'cultivos' ya existía antes de esta funcionalidad)
     cursor.execute("PRAGMA table_info(cultivos)")
     columnas_existentes = [fila["name"] for fila in cursor.fetchall()]
     if "poligono" not in columnas_existentes:
         cursor.execute("ALTER TABLE cultivos ADD COLUMN poligono TEXT")
+
+
 
     conexion.commit()
     conexion.close()
