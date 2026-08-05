@@ -13,6 +13,10 @@ from modelos.usuario import obtener_usuario_por_correo, crear_usuario, contar_us
 
 from fastapi.responses import FileResponse
 from modelos.monitoreo import listar_monitoreos_procesados, obtener_monitoreo_por_id
+
+from modelos.monitoreo import listar_monitoreos_procesados_filtrado
+from modelos.cultivo import listar_cultivos
+
 from modelos.anomalia import obtener_resumen_monitoreo, listar_anomalias_de_monitoreo
 
 
@@ -119,12 +123,26 @@ def alternar_estado_usuario(id_usuario: int, activo_actual: int = Form(...),
     return RedirectResponse(url="/usuarios", status_code=303)
 
 @app.get("/monitoreos", response_class=HTMLResponse)
-def pagina_monitoreos(request: Request, usuario=Depends(requerir_rol("encargado", "administrador"))):
-    lista = listar_monitoreos_procesados()
-    return templates.TemplateResponse(
-        "monitoreos.html", {"request": request, "usuario": usuario, "monitoreos": lista}
-    )
+def pagina_monitoreos(
+    request: Request,
+    id_cultivo: str = None,
+    fecha_desde: str = None,
+    fecha_hasta: str = None,
+    usuario=Depends(requerir_rol("encargado", "administrador")),
+):
+    # Convertimos manualmente a int SOLO si viene un valor real (no vacío)
+    id_cultivo_int = int(id_cultivo) if id_cultivo else None
 
+    lista = listar_monitoreos_procesados_filtrado(id_cultivo_int, fecha_desde, fecha_hasta)
+    cultivos = listar_cultivos()
+
+    return templates.TemplateResponse(
+        "monitoreos.html",
+        {
+            "request": request, "usuario": usuario, "monitoreos": lista, "cultivos": cultivos,
+            "filtro_cultivo": id_cultivo_int, "filtro_desde": fecha_desde, "filtro_hasta": fecha_hasta,
+        }
+    )
 
 @app.get("/monitoreos/{id_monitoreo}", response_class=HTMLResponse)
 def detalle_monitoreo(request: Request, id_monitoreo: int,

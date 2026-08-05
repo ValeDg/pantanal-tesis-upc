@@ -12,6 +12,31 @@
             <a href="/dashboard">← Volver al dashboard</a>
         </div>
 
+        <form method="get" action="/monitoreos" class="formulario-filtro">
+            <label>Cultivo:</label>
+            <select name="id_cultivo">
+                <option value="">Todos</option>
+                {% for c in cultivos %}
+                    <option value="{{ c.id_cultivo }}" {% if filtro_cultivo == c.id_cultivo %}selected{% endif %}>
+                        {{ c.nombre }}
+                    </option>
+                {% endfor %}
+            </select>
+
+            <label>Desde:</label>
+            <input type="date" name="fecha_desde" value="{{ filtro_desde or '' }}">
+
+            <label>Hasta:</label>
+            <input type="date" name="fecha_hasta" value="{{ filtro_hasta or '' }}">
+
+            <button type="submit">Filtrar</button>
+            <a href="/monitoreos" class="boton-limpiar">Limpiar filtros</a>
+        </form>
+
+        {% if monitoreos|length == 0 %}
+            <p class="texto-ayuda">No hay monitoreos que coincidan con los filtros seleccionados.</p>
+        {% endif %}
+
         <table class="tabla-usuarios">
             <thead>
                 <tr>

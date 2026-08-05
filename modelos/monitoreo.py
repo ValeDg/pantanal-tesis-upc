@@ -81,3 +81,38 @@ def obtener_monitoreo_por_id(id_monitoreo: int):
     fila = cursor.fetchone()
     conexion.close()
     return fila
+
+def listar_monitoreos_procesados_filtrado(id_cultivo: int = None, fecha_desde: str = None, fecha_hasta: str = None):
+    """
+    Igual que listar_monitoreos_procesados, pero permite filtrar opcionalmente
+    por cultivo y/o rango de fechas. Cualquier parámetro en None se ignora.
+    """
+    conexion = obtener_conexion()
+    cursor = conexion.cursor()
+
+    consulta = """
+        SELECT m.id_monitoreo, m.fecha, c.nombre AS nombre_cultivo, m.ruta_imagen_resultado
+        FROM monitoreos m
+        JOIN cultivos c ON m.id_cultivo = c.id_cultivo
+        WHERE m.estado = 'procesado'
+    """
+    parametros = []
+
+    if id_cultivo:
+        consulta += " AND m.id_cultivo = ?"
+        parametros.append(id_cultivo)
+
+    if fecha_desde:
+        consulta += " AND m.fecha >= ?"
+        parametros.append(fecha_desde)
+
+    if fecha_hasta:
+        consulta += " AND m.fecha <= ?"
+        parametros.append(fecha_hasta)
+
+    consulta += " ORDER BY m.fecha DESC"
+
+    cursor.execute(consulta, parametros)
+    filas = cursor.fetchall()
+    conexion.close()
+    return filas
