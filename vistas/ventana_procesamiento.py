@@ -40,7 +40,8 @@ class VentanaProcesamiento(ctk.CTkToplevel):
             .pack(padx=20, pady=25)
 
     def _procesar(self):
-        from vistas.ventana_reproductor import VentanaReproductor  # import local, evita ciclo
+        from vistas.ventana_reproductor import VentanaReproductor
+        from modelos.cultivo import obtener_poligono_cultivo
 
         texto_elegido = self.var_monitoreo.get()
         id_monitoreo = self.mapa_monitoreos.get(texto_elegido)
@@ -50,11 +51,16 @@ class VentanaProcesamiento(ctk.CTkToplevel):
             return
 
         pendientes = listar_monitoreos_pendientes()
-        ruta_video = None
+        fila_monitoreo = None
         for fila in pendientes:
             if fila["id_monitoreo"] == id_monitoreo:
-                ruta_video = fila["ruta_video"]
+                fila_monitoreo = fila
                 break
 
-        VentanaReproductor(self.master, id_monitoreo, ruta_video)
+        poligono = obtener_poligono_cultivo(fila_monitoreo["id_cultivo"])
+
+        VentanaReproductor(
+            self.master, id_monitoreo, fila_monitoreo["ruta_video"],
+            fila_monitoreo["ruta_gps"], poligono=poligono
+        )
         self.destroy()

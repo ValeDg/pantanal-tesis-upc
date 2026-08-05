@@ -37,8 +37,9 @@ class FormularioMonitoreo(ctk.CTkToplevel):
         cultivos = listar_cultivos()
         nombres_cultivos = []
         for fila in cultivos:
-            nombres_cultivos.append(fila["nombre"])
-            self.mapa_cultivos[fila["nombre"]] = fila["id_cultivo"]
+            texto_mostrado = f"#{fila['id_cultivo']} - {fila['nombre']}"  # único, sin ambigüedad
+            nombres_cultivos.append(texto_mostrado)
+            self.mapa_cultivos[texto_mostrado] = fila["id_cultivo"]
 
         self.combo_cultivo = ctk.CTkComboBox(self, values=nombres_cultivos, variable=self.var_cultivo, width=200)
         self.combo_cultivo.grid(row=1, column=1, padx=20, pady=8)
@@ -57,7 +58,7 @@ class FormularioMonitoreo(ctk.CTkToplevel):
         self.label_video = ctk.CTkLabel(self, text="Ningún video seleccionado", text_color="gray")
         self.label_video.grid(row=5, column=0, columnspan=2)
 
-    # --- Carga de GPS (OPCIONAL POR AHORAA) ---
+    # --- Carga de GPS (OPCIONAL POR) ---
         ctk.CTkButton(self, text="Cargar GPS (.SRT) - Opcional", command=self._seleccionar_gps) \
             .grid(row=6, column=0, columnspan=2, pady=(15, 5))
         self.label_gps = ctk.CTkLabel(self, text="Sin archivo GPS (opcional)", text_color="gray")
@@ -113,7 +114,8 @@ class FormularioMonitoreo(ctk.CTkToplevel):
         )
 
         if quiere_procesar:
-            from vistas.ventana_reproductor import VentanaReproductor  # import local, evita ciclo
-            VentanaReproductor(self.master, id_monitoreo, ruta_video_final)
+            from vistas.ventana_reproductor import VentanaReproductor
+            from modelos.cultivo import obtener_poligono_cultivo
 
-        self.destroy()
+            poligono = obtener_poligono_cultivo(id_cultivo)
+            VentanaReproductor(self.master, id_monitoreo, ruta_video_final, ruta_gps_final, poligono=poligono)

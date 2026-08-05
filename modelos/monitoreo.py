@@ -22,7 +22,7 @@ def listar_monitoreos_pendientes():
     conexion = obtener_conexion()
     cursor = conexion.cursor()
     cursor.execute("""
-        SELECT m.id_monitoreo, m.fecha, c.nombre AS nombre_cultivo, m.ruta_video
+        SELECT m.id_monitoreo, m.id_cultivo, m.fecha, c.nombre AS nombre_cultivo, m.ruta_video, m.ruta_gps
         FROM monitoreos m
         JOIN cultivos c ON m.id_cultivo = c.id_cultivo
         WHERE m.estado = 'registrado'
@@ -31,7 +31,6 @@ def listar_monitoreos_pendientes():
     filas = cursor.fetchall()
     conexion.close()
     return filas
-
 
 def marcar_como_procesado(id_monitoreo: int):
     conexion = obtener_conexion()

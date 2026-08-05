@@ -14,7 +14,6 @@ RANGOS_COLOR = {
     ],
 }
 
-# Colores BGR (formato OpenCV) para dibujar cada rectángulo en pantalla
 COLOR_DIBUJO_BGR = {
     "rojo": (0, 0, 255),
     "naranja": (0, 165, 255),
@@ -24,13 +23,22 @@ COLOR_DIBUJO_BGR = {
 AREA_MINIMA_ANOMALIA = 150
 
 
-def detectar_zonas_color(imagen):
+def detectar_zonas_color(imagen, roi=None):
     """
-    Devuelve una lista de anomalías detectadas en el fotograma:
-    [{"nivel": "rojo", "pos_x": 120, "pos_y": 340,
-      "rect": (x, y, ancho, alto)}, ...]
+    Detecta zonas de color en la imagen. Si se pasa un roi=(x,y,ancho,alto),
+    SOLO analiza esa región del fotograma, ignorando el resto (casas, caminos, etc.).
+    Las coordenadas devueltas siempre son relativas a la imagen COMPLETA,
+    para que el dibujo posterior funcione correctamente.
     """
-    imagen_hsv = cv2.cvtColor(imagen, cv2.COLOR_BGR2HSV)
+    if roi:
+        x0, y0, ancho, alto = roi
+        imagen_analizar = imagen[y0:y0 + alto, x0:x0 + ancho]
+        offset_x, offset_y = x0, y0
+    else:
+        imagen_analizar = imagen
+        offset_x, offset_y = 0, 0
+
+    imagen_hsv = cv2.cvtColor(imagen_analizar, cv2.COLOR_BGR2HSV)
     anomalias_encontradas = []
 
     for nivel, rangos in RANGOS_COLOR.items():
@@ -49,29 +57,24 @@ def detectar_zonas_color(imagen):
             momentos = cv2.moments(contorno)
             if momentos["m00"] == 0:
                 continue
-            centro_x = int(momentos["m10"] / momentos["m00"])
-            centro_y = int(momentos["m01"] / momentos["m00"])
 
-    # Rectangulo dibujado para mostrar los obejtos detectados
-            x, y, ancho, alto = cv2.boundingRect(contorno)
+            # Sumamos el offset del ROI para que la posición sea relativa a la imagen COMPLETA
+            centro_x = int(momentos["m10"] / momentos["m00"]) + offset_x
+            centro_y = int(momentos["m01"] / momentos["m00"]) + offset_y
+
+            x, y, ancho_r, alto_r = cv2.boundingRect(contorno)
 
             anomalias_encontradas.append({
                 "nivel": nivel,
                 "pos_x": centro_x,
                 "pos_y": centro_y,
-                "rect": (x, y, ancho, alto),
+                "rect": (x + offset_x, y + offset_y, ancho_r, alto_r),
             })
 
     return anomalias_encontradas
 
 
 def dibujar_detecciones(imagen, anomalias, colores_activos=None):
-    """
-    Dibuja un rectángulo sobre la imagen por cada anomalía detectada.
-    colores_activos: set opcional, ej. {"rojo", "naranja"} — si se pasa,
-    solo dibuja esos niveles (para los checkboxes de la interfaz).
-    No modifica la imagen original: trabaja sobre una copia.
-    """
     imagen_dibujada = imagen.copy()
 
     for anomalia in anomalias:
