@@ -9,6 +9,11 @@
     <div class="contenedor">
         <h1>Bienvenido, {{ usuario.nombre }}</h1>
         <p>Rol: {{ usuario.rol }}</p>
+
+        {% if usuario.rol == "administrador" %}
+            <p><a href="/usuarios">Gestionar usuarios</a></p>
+        {% endif %}
+
         <a href="/logout">Cerrar sesión</a>
     </div>
 </body>

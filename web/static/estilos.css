@@ -45,3 +45,71 @@ button {
 a {
     color: #0f9b8e;
 }
+
+.contenedor-ancho {
+    background-color: #16213e;
+    padding: 30px;
+    border-radius: 12px;
+    width: 700px;
+    margin: 40px auto;
+}
+
+.encabezado {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.encabezado a {
+    color: #0f9b8e;
+    text-decoration: none;
+}
+
+.tabla-usuarios {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 30px;
+}
+
+.tabla-usuarios th, .tabla-usuarios td {
+    text-align: left;
+    padding: 10px;
+    border-bottom: 1px solid #2a2a4e;
+}
+
+.estado-activo { color: #4ade80; }
+.estado-inactivo { color: #ff6b6b; }
+
+.boton-pequeno {
+    background-color: #0f9b8e;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.formulario-crear label {
+    display: block;
+    margin-top: 10px;
+    margin-bottom: 4px;
+}
+
+.formulario-crear input, .formulario-crear select {
+    width: 100%;
+    padding: 8px;
+    border-radius: 5px;
+    border: none;
+    box-sizing: border-box;
+}
+
+.formulario-crear button {
+    margin-top: 15px;
+    padding: 10px 20px;
+    background-color: #0f9b8e;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}

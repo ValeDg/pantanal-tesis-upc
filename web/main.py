@@ -5,8 +5,10 @@ from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
 
 from db.conexion import inicializar_base_datos
-from modelos.usuario import obtener_usuario_por_correo, crear_usuario, contar_usuarios
 from web.auth import generar_hash, verificar_contrasena, obtener_usuario_actual, requerir_rol
+
+from modelos.usuario import listar_usuarios, cambiar_estado_usuario
+from modelos.usuario import obtener_usuario_por_correo, crear_usuario, contar_usuarios, listar_usuarios, cambiar_estado_usuario
 
 app = FastAPI(title="PANTANAL Web")
 
@@ -72,3 +74,40 @@ def cerrar_sesion(request: Request):
 @app.get("/dashboard", response_class=HTMLResponse)
 def dashboard(request: Request, usuario=Depends(obtener_usuario_actual)):
     return templates.TemplateResponse("dashboard.html", {"request": request, "usuario": usuario})
+
+
+@app.get("/usuarios", response_class=HTMLResponse)
+def pagina_usuarios(request: Request, usuario=Depends(requerir_rol("administrador"))):
+    lista = listar_usuarios()
+    return templates.TemplateResponse(
+        "usuarios.html",
+        {"request": request, "usuario": usuario, "usuarios": lista, "error": None}
+    )
+
+
+@app.post("/usuarios/crear")
+def crear_usuario_ruta(
+    request: Request,
+    nombre: str = Form(...),
+    correo: str = Form(...),
+    contrasena: str = Form(...),
+    rol: str = Form(...),
+    usuario=Depends(requerir_rol("administrador")),
+):
+    if obtener_usuario_por_correo(correo) is not None:
+        lista = listar_usuarios()
+        return templates.TemplateResponse(
+            "usuarios.html",
+            {"request": request, "usuario": usuario, "usuarios": lista,
+             "error": "Ya existe un usuario con ese correo."}
+        )
+
+    crear_usuario(nombre, correo, generar_hash(contrasena), rol)
+    return RedirectResponse(url="/usuarios", status_code=303)
+
+
+@app.post("/usuarios/{id_usuario}/alternar-estado")
+def alternar_estado_usuario(id_usuario: int, activo_actual: int = Form(...),
+                             usuario=Depends(requerir_rol("administrador"))):
+    cambiar_estado_usuario(id_usuario, activo=not bool(activo_actual))
+    return RedirectResponse(url="/usuarios", status_code=303)
