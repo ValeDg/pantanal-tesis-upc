@@ -13,7 +13,8 @@ from modelos.usuario import obtener_usuario_por_correo, crear_usuario, contar_us
 
 from fastapi.responses import FileResponse
 from modelos.monitoreo import listar_monitoreos_procesados, obtener_monitoreo_por_id
-from modelos.anomalia import obtener_resumen_monitoreo
+from modelos.anomalia import obtener_resumen_monitoreo, listar_anomalias_de_monitoreo
+
 
 app = FastAPI(title="PANTANAL Web")
 
@@ -134,10 +135,12 @@ def detalle_monitoreo(request: Request, id_monitoreo: int,
         return RedirectResponse(url="/monitoreos", status_code=303)
 
     resumen = obtener_resumen_monitoreo(id_monitoreo)
+    anomalias = listar_anomalias_de_monitoreo(id_monitoreo)
 
     return templates.TemplateResponse(
         "detalle_monitoreo.html",
-        {"request": request, "usuario": usuario, "monitoreo": monitoreo, "resumen": resumen}
+        {"request": request, "usuario": usuario, "monitoreo": monitoreo,
+         "resumen": resumen, "anomalias": anomalias}
     )
 
 
@@ -149,3 +152,4 @@ def servir_imagen_resultado(id_monitoreo: int, usuario=Depends(requerir_rol("enc
         raise HTTPException(status_code=404, detail="Imagen no encontrada")
 
     return FileResponse(monitoreo["ruta_imagen_resultado"])
+

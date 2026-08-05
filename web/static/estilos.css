@@ -138,3 +138,9 @@ a {
     width: 100%;
     cursor: zoom-out;
 }
+
+.tabla-scroll {
+    max-height: 400px;
+    overflow-y: auto;
+    margin-bottom: 20px;
+}

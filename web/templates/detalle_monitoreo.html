@@ -24,6 +24,41 @@
         <p class="texto-ayuda">Haz clic en la imagen para ampliarla</p>
         <img src="/imagenes/{{ monitoreo.id_monitoreo }}" alt="Imagen procesada"
              class="imagen-resultado" onclick="this.classList.toggle('ampliada')">
+
+        <h2>Detalle de anomalías detectadas</h2>
+        <div class="tabla-scroll">
+            <table class="tabla-usuarios">
+                <thead>
+                    <tr>
+                        <th>Nivel</th>
+                        <th>Coordenadas GPS</th>
+                        <th>Cantidad</th>
+                        <th>% dentro de su categoría</th>
+                        <th>Fecha</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for a in anomalias %}
+                    <tr>
+                        <td>
+                            {% if a.nivel == "rojo" %}🔴{% elif a.nivel == "naranja" %}🟠{% else %}🟢{% endif %}
+                            {{ a.nivel }}
+                        </td>
+                        <td>
+                            {% if a.latitud %}
+                                {{ "%.6f"|format(a.latitud) }}, {{ "%.6f"|format(a.longitud) }}
+                            {% else %}
+                                <span class="texto-ayuda">Sin GPS</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ a.cantidad }}</td>
+                        <td>{{ a.porcentaje_categoria }}%</td>
+                        <td>{{ monitoreo.fecha }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 </body>
 </html>

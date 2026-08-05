@@ -62,3 +62,41 @@ def obtener_resumen_monitoreo(id_monitoreo: int) -> dict:
         "nivel_predominante": nivel_predominante,
         "estado_general": estado_general,
     }
+
+def listar_anomalias_de_monitoreo(id_monitoreo: int):
+    """
+    Agrupa las anomalías por combinación única de (nivel, coordenada),
+    para no repetir cientos de filas casi idénticas cuando muchas detecciones
+    caen en el mismo punto GPS (normal, ya que varias anomalías pueden
+    compartir el mismo fotograma/coordenada).
+    """
+    conexion = obtener_conexion()
+    cursor = conexion.cursor()
+    cursor.execute("""
+        SELECT nivel, latitud, longitud, COUNT(*) as cantidad
+        FROM anomalias
+        WHERE id_monitoreo = ?
+        GROUP BY nivel, latitud, longitud
+        ORDER BY nivel, cantidad DESC
+    """, (id_monitoreo,))
+    filas = cursor.fetchall()
+    conexion.close()
+
+    totales_por_nivel = {"rojo": 0, "naranja": 0, "verde": 0}
+    for fila in filas:
+        totales_por_nivel[fila["nivel"]] += fila["cantidad"]
+
+    grupos_con_porcentaje = []
+    for fila in filas:
+        total_de_su_nivel = totales_por_nivel[fila["nivel"]]
+        porcentaje = round(fila["cantidad"] / total_de_su_nivel * 100, 1) if total_de_su_nivel > 0 else 0
+
+        grupos_con_porcentaje.append({
+            "nivel": fila["nivel"],
+            "latitud": fila["latitud"],
+            "longitud": fila["longitud"],
+            "cantidad": fila["cantidad"],
+            "porcentaje_categoria": porcentaje,
+        })
+
+    return grupos_con_porcentaje
