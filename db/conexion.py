@@ -36,7 +36,6 @@ def inicializar_base_datos():
         )
     """)
 
-    # --- NUEVA: tabla de anomalías detectadas (SPRINT 2) ---
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS anomalias (
             id_anomalia    INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -62,14 +61,17 @@ def inicializar_base_datos():
         )
     """)
 
-# --- Migración: agrega la columna 'poligono' si todavía no existe ---
-    # (necesario porque la tabla 'cultivos' ya existía antes de esta funcionalidad)
+    # --- Migración: agrega 'poligono' a cultivos si todavía no existe ---
     cursor.execute("PRAGMA table_info(cultivos)")
-    columnas_existentes = [fila["name"] for fila in cursor.fetchall()]
-    if "poligono" not in columnas_existentes:
+    columnas_cultivos = [fila["name"] for fila in cursor.fetchall()]
+    if "poligono" not in columnas_cultivos:
         cursor.execute("ALTER TABLE cultivos ADD COLUMN poligono TEXT")
 
-
+    # --- Migración: agrega 'ruta_imagen_resultado' a monitoreos si todavía no existe ---
+    cursor.execute("PRAGMA table_info(monitoreos)")
+    columnas_monitoreos = [fila["name"] for fila in cursor.fetchall()]
+    if "ruta_imagen_resultado" not in columnas_monitoreos:
+        cursor.execute("ALTER TABLE monitoreos ADD COLUMN ruta_imagen_resultado TEXT")
 
     conexion.commit()
     conexion.close()

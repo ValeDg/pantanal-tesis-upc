@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>PANTANAL - Monitoreos</title>
+    <link rel="stylesheet" href="/static/estilos.css">
+</head>
+<body>
+    <div class="contenedor-ancho">
+        <div class="encabezado">
+            <h1>Monitoreos Procesados</h1>
+            <a href="/dashboard">← Volver al dashboard</a>
+        </div>
+
+        <table class="tabla-usuarios">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Cultivo</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for m in monitoreos %}
+                <tr>
+                    <td>{{ m.fecha }}</td>
+                    <td>{{ m.nombre_cultivo }}</td>
+                    <td><a href="/monitoreos/{{ m.id_monitoreo }}">Ver resultados →</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

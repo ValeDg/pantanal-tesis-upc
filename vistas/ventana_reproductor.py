@@ -5,8 +5,9 @@ from PIL import Image
 from procesamiento.detector_color import detectar_zonas_color, dibujar_detecciones
 from procesamiento.parser_gps import parsear_srt, buscar_coordenada
 from modelos.anomalia import guardar_anomalias, obtener_resumen_monitoreo
-from modelos.monitoreo import marcar_como_procesado
 from utils.geometria import punto_dentro_del_poligono
+import os
+from modelos.monitoreo import marcar_como_procesado, guardar_imagen_resultado
 
 
 class VentanaReproductor(ctk.CTkToplevel):
@@ -27,6 +28,9 @@ class VentanaReproductor(ctk.CTkToplevel):
         self.contador_fotograma = 0
         self.anomalias_acumuladas = []
         self.anomalias_descartadas_fuera_area = 0  # solo para mostrar en el resumen
+    # ------------NUEVO-------------- SPRINT 3
+        self.mejor_fotograma_imagen = None   # guarda la imagen (matriz) con más anomalías vistas
+        self.mejor_fotograma_cantidad = -1    # cuántas anomalías tenía ese fotograma
 
         self.coordenadas_gps = {}
         if ruta_gps:
@@ -119,6 +123,11 @@ class VentanaReproductor(ctk.CTkToplevel):
         anomalias = detectar_zonas_color(imagen)
         imagen_dibujada = dibujar_detecciones(imagen, anomalias, self.colores_activos)
 
+        # Guardamos este fotograma como "el mejor" si tiene más anomalías que el candidato actual
+        if len(anomalias) > self.mejor_fotograma_cantidad:
+            self.mejor_fotograma_cantidad = len(anomalias)
+            self.mejor_fotograma_imagen = imagen_dibujada.copy()
+
         self._actualizar_widget_imagen(imagen_dibujada)
         self.label_contador.configure(text=f"Zonas en pantalla: {len(anomalias)}")
 
@@ -177,6 +186,13 @@ class VentanaReproductor(ctk.CTkToplevel):
         guardar_anomalias(self.id_monitoreo, self.anomalias_acumuladas)
         marcar_como_procesado(self.id_monitoreo)
         self.ya_guardado = True
+
+        if self.mejor_fotograma_imagen is not None:
+            carpeta_resultados = "resultados_imagenes"
+            os.makedirs(carpeta_resultados, exist_ok=True)
+            ruta_imagen = os.path.join(carpeta_resultados, f"monitoreo_{self.id_monitoreo}.jpg")
+            cv2.imwrite(ruta_imagen, self.mejor_fotograma_imagen)
+            guardar_imagen_resultado(self.id_monitoreo, ruta_imagen)
 
         resumen = obtener_resumen_monitoreo(self.id_monitoreo)
 

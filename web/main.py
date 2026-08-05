@@ -6,9 +6,14 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from db.conexion import inicializar_base_datos
 from web.auth import generar_hash, verificar_contrasena, obtener_usuario_actual, requerir_rol
+from fastapi import HTTPException
 
 from modelos.usuario import listar_usuarios, cambiar_estado_usuario
 from modelos.usuario import obtener_usuario_por_correo, crear_usuario, contar_usuarios, listar_usuarios, cambiar_estado_usuario
+
+from fastapi.responses import FileResponse
+from modelos.monitoreo import listar_monitoreos_procesados, obtener_monitoreo_por_id
+from modelos.anomalia import obtener_resumen_monitoreo
 
 app = FastAPI(title="PANTANAL Web")
 
@@ -111,3 +116,36 @@ def alternar_estado_usuario(id_usuario: int, activo_actual: int = Form(...),
                              usuario=Depends(requerir_rol("administrador"))):
     cambiar_estado_usuario(id_usuario, activo=not bool(activo_actual))
     return RedirectResponse(url="/usuarios", status_code=303)
+
+@app.get("/monitoreos", response_class=HTMLResponse)
+def pagina_monitoreos(request: Request, usuario=Depends(requerir_rol("encargado", "administrador"))):
+    lista = listar_monitoreos_procesados()
+    return templates.TemplateResponse(
+        "monitoreos.html", {"request": request, "usuario": usuario, "monitoreos": lista}
+    )
+
+
+@app.get("/monitoreos/{id_monitoreo}", response_class=HTMLResponse)
+def detalle_monitoreo(request: Request, id_monitoreo: int,
+                       usuario=Depends(requerir_rol("encargado", "administrador"))):
+    monitoreo = obtener_monitoreo_por_id(id_monitoreo)
+
+    if monitoreo is None or monitoreo["estado"] != "procesado":
+        return RedirectResponse(url="/monitoreos", status_code=303)
+
+    resumen = obtener_resumen_monitoreo(id_monitoreo)
+
+    return templates.TemplateResponse(
+        "detalle_monitoreo.html",
+        {"request": request, "usuario": usuario, "monitoreo": monitoreo, "resumen": resumen}
+    )
+
+
+@app.get("/imagenes/{id_monitoreo}")
+def servir_imagen_resultado(id_monitoreo: int, usuario=Depends(requerir_rol("encargado", "administrador"))):
+    monitoreo = obtener_monitoreo_por_id(id_monitoreo)
+
+    if monitoreo is None or not monitoreo["ruta_imagen_resultado"]:
+        raise HTTPException(status_code=404, detail="Imagen no encontrada")
+
+    return FileResponse(monitoreo["ruta_imagen_resultado"])

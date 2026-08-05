@@ -41,3 +41,43 @@ def marcar_como_procesado(id_monitoreo: int):
     )
     conexion.commit()
     conexion.close()
+
+def guardar_imagen_resultado(id_monitoreo: int, ruta_imagen: str):
+    conexion = obtener_conexion()
+    cursor = conexion.cursor()
+    cursor.execute(
+        "UPDATE monitoreos SET ruta_imagen_resultado = ? WHERE id_monitoreo = ?",
+        (ruta_imagen, id_monitoreo)
+    )
+    conexion.commit()
+    conexion.close()
+
+
+def listar_monitoreos_procesados():
+    """Monitoreos ya procesados, para la web (Encargado de Campo)."""
+    conexion = obtener_conexion()
+    cursor = conexion.cursor()
+    cursor.execute("""
+        SELECT m.id_monitoreo, m.fecha, c.nombre AS nombre_cultivo, m.ruta_imagen_resultado
+        FROM monitoreos m
+        JOIN cultivos c ON m.id_cultivo = c.id_cultivo
+        WHERE m.estado = 'procesado'
+        ORDER BY m.fecha DESC
+    """)
+    filas = cursor.fetchall()
+    conexion.close()
+    return filas
+
+
+def obtener_monitoreo_por_id(id_monitoreo: int):
+    conexion = obtener_conexion()
+    cursor = conexion.cursor()
+    cursor.execute("""
+        SELECT m.*, c.nombre AS nombre_cultivo
+        FROM monitoreos m
+        JOIN cultivos c ON m.id_cultivo = c.id_cultivo
+        WHERE m.id_monitoreo = ?
+    """, (id_monitoreo,))
+    fila = cursor.fetchone()
+    conexion.close()
+    return fila

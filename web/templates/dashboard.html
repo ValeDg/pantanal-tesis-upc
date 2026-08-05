@@ -10,9 +10,14 @@
         <h1>Bienvenido, {{ usuario.nombre }}</h1>
         <p>Rol: {{ usuario.rol }}</p>
 
+        {% if usuario.rol in ["encargado", "administrador"] %}
+            <p><a href="/monitoreos">Ver monitoreos</a></p>
+        {% endif %}
+
         {% if usuario.rol == "administrador" %}
             <p><a href="/usuarios">Gestionar usuarios</a></p>
         {% endif %}
+        
 
         <a href="/logout">Cerrar sesión</a>
     </div>

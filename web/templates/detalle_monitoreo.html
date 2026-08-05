@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>PANTANAL - Detalle del Monitoreo</title>
+    <link rel="stylesheet" href="/static/estilos.css">
+</head>
+<body>
+    <div class="contenedor-ancho">
+        <div class="encabezado">
+            <h1>Monitoreo #{{ monitoreo.id_monitoreo }} - {{ monitoreo.nombre_cultivo }}</h1>
+            <a href="/monitoreos">← Volver a monitoreos</a>
+        </div>
+
+        <p>Fecha: {{ monitoreo.fecha }}</p>
+
+        <div class="tarjeta-resumen">
+            <p><strong>Estado general:</strong> {{ resumen.estado_general }}</p>
+            <p><strong>Área afectada:</strong> {{ resumen.porcentaje_afectado }}%</p>
+            <p><strong>Nivel predominante:</strong> {{ resumen.nivel_predominante }}</p>
+            <p>🔴 Rojo: {{ resumen.conteos.rojo }} &nbsp; 🟠 Naranja: {{ resumen.conteos.naranja }} &nbsp; 🟢 Verde: {{ resumen.conteos.verde }}</p>
+        </div>
+
+        <p class="texto-ayuda">Haz clic en la imagen para ampliarla</p>
+        <img src="/imagenes/{{ monitoreo.id_monitoreo }}" alt="Imagen procesada"
+             class="imagen-resultado" onclick="this.classList.toggle('ampliada')">
+    </div>
+</body>
+</html>

@@ -113,3 +113,28 @@ a {
     border-radius: 6px;
     cursor: pointer;
 }
+
+.tarjeta-resumen {
+    background-color: #0f3057;
+    padding: 15px;
+    border-radius: 8px;
+    margin: 15px 0;
+}
+
+.texto-ayuda {
+    color: gray;
+    font-size: 13px;
+}
+
+.imagen-resultado {
+    max-width: 100%;
+    border-radius: 8px;
+    cursor: zoom-in;
+    transition: transform 0.2s;
+}
+
+.imagen-resultado.ampliada {
+    max-width: none;
+    width: 100%;
+    cursor: zoom-out;
+}
