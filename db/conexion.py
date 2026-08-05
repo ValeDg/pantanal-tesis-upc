@@ -1,33 +1,19 @@
 import sqlite3
 import os
 
-# Ruta donde vivirá el archivo de base de datos.
-# os.path.dirname(__file__) obtiene la carpeta donde está ESTE archivo (db/),
-# así la ruta funciona sin importar desde dónde ejecutes main.py
 RUTA_DB = os.path.join(os.path.dirname(__file__), "pantanal.db")
 
 
 def obtener_conexion():
-    """
-    Abre y devuelve una conexión a la base de datos SQLite.
-    Cada vez que necesitemos hablar con la BD, llamamos a esta función.
-    """
     conexion = sqlite3.connect(RUTA_DB)
-    # Esto permite acceder a las columnas por nombre (fila["nombre"])
-    # en vez de solo por posición (fila[0]) — más legible y menos propenso a errores.
     conexion.row_factory = sqlite3.Row
     return conexion
 
 
 def inicializar_base_datos():
-    """
-    Crea las tablas si todavía no existen. Se llama una sola vez,
-    al arrancar la aplicación (desde main.py).
-    """
     conexion = obtener_conexion()
     cursor = conexion.cursor()
 
-    # IF NOT EXISTS evita error si ya corriste esto antes
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS cultivos (
             id_cultivo   INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -50,7 +36,27 @@ def inicializar_base_datos():
         )
     """)
 
-    # Guarda los cambios en el archivo .db de forma permanente
+    # --- NUEVA: tabla de anomalías detectadas (SPRINT 2) ---
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS anomalias (
+            id_anomalia    INTEGER PRIMARY KEY AUTOINCREMENT,
+            id_monitoreo   INTEGER NOT NULL,
+            nivel          TEXT NOT NULL,
+            fotograma_num  INTEGER NOT NULL,
+            pos_x          INTEGER,
+            pos_y          INTEGER,
+            latitud        REAL,
+            longitud       REAL,
+            FOREIGN KEY (id_monitoreo) REFERENCES monitoreos(id_monitoreo)
+        )
+    """)
+
+# --- Migración: agrega la columna 'poligono' si todavía no existe ---
+    # (necesario porque la tabla 'cultivos' ya existía antes de esta funcionalidad)
+    cursor.execute("PRAGMA table_info(cultivos)")
+    columnas_existentes = [fila["name"] for fila in cursor.fetchall()]
+    if "poligono" not in columnas_existentes:
+        cursor.execute("ALTER TABLE cultivos ADD COLUMN poligono TEXT")
+
     conexion.commit()
-    # Siempre cerramos la conexión cuando terminamos de usarla
     conexion.close()
