@@ -116,3 +116,24 @@ def listar_monitoreos_procesados_filtrado(id_cultivo: int = None, fecha_desde: s
     filas = cursor.fetchall()
     conexion.close()
     return filas
+
+def listar_ultimos_monitoreos_con_ubicacion(cantidad: int = 5):
+    """
+    Últimos monitoreos procesados, con una coordenada aproximada
+    (la primera anomalía con GPS que se encuentre), para mostrarlos en el mapa.
+    """
+    conexion = obtener_conexion()
+    cursor = conexion.cursor()
+    cursor.execute("""
+        SELECT m.id_monitoreo, m.fecha, c.nombre AS nombre_cultivo,
+               (SELECT latitud FROM anomalias WHERE id_monitoreo = m.id_monitoreo AND latitud IS NOT NULL LIMIT 1) as latitud,
+               (SELECT longitud FROM anomalias WHERE id_monitoreo = m.id_monitoreo AND longitud IS NOT NULL LIMIT 1) as longitud
+        FROM monitoreos m
+        JOIN cultivos c ON m.id_cultivo = c.id_cultivo
+        WHERE m.estado = 'procesado'
+        ORDER BY m.fecha DESC
+        LIMIT ?
+    """, (cantidad,))
+    filas = cursor.fetchall()
+    conexion.close()
+    return filas

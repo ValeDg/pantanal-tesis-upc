@@ -1,77 +1,68 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>PANTANAL - Gestión de Usuarios</title>
-    <link rel="stylesheet" href="/static/estilos.css">
-</head>
-<body>
-    <div class="contenedor-ancho">
-        <div class="encabezado">
-            <h1>Gestión de Usuarios</h1>
-            <a href="/dashboard">← Volver al dashboard</a>
-        </div>
+{% extends "base.html" %}
 
-        {% if error %}
-            <p class="mensaje-error">{{ error }}</p>
-        {% endif %}
+{% block titulo %}PANTANAL - Usuarios{% endblock %}
 
-        <table class="tabla-usuarios">
-            <thead>
-                <tr>
-                    <th>Nombre</th>
-                    <th>Correo</th>
-                    <th>Rol</th>
-                    <th>Estado</th>
-                    <th>Acción</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for u in usuarios %}
-                <tr>
-                    <td>{{ u.nombre }}</td>
-                    <td>{{ u.correo }}</td>
-                    <td>{{ u.rol }}</td>
-                    <td>
-                        {% if u.activo %}
-                            <span class="estado-activo">Activo</span>
-                        {% else %}
-                            <span class="estado-inactivo">Desactivado</span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        <form method="post" action="/usuarios/{{ u.id_usuario }}/alternar-estado">
-                            <input type="hidden" name="activo_actual" value="{{ u.activo }}">
-                            <button type="submit" class="boton-pequeno">
-                                {% if u.activo %}Desactivar{% else %}Activar{% endif %}
-                            </button>
-                        </form>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+{% block contenido %}
+    <h1>Gestión de Usuarios</h1>
 
-        <h2>Crear nuevo usuario</h2>
-        <form method="post" action="/usuarios/crear" class="formulario-crear">
-            <label>Nombre:</label>
-            <input type="text" name="nombre" required>
+    {% if error %}
+        <p class="mensaje-error">{{ error }}</p>
+    {% endif %}
 
-            <label>Correo:</label>
-            <input type="email" name="correo" required>
+    <table class="tabla-usuarios">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Correo</th>
+                <th>Rol</th>
+                <th>Estado</th>
+                <th>Acción</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for u in usuarios %}
+            <tr>
+                <td>{{ u.nombre }}</td>
+                <td>{{ u.correo }}</td>
+                <td>{{ u.rol }}</td>
+                <td>
+                    {% if u.activo %}
+                        <span class="estado-activo">Activo</span>
+                    {% else %}
+                        <span class="estado-inactivo">Desactivado</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <form method="post" action="/usuarios/{{ u.id_usuario }}/alternar-estado">
+                        <input type="hidden" name="activo_actual" value="{{ u.activo }}">
+                        <button type="submit" class="boton-pequeno">
+                            {% if u.activo %}Desactivar{% else %}Activar{% endif %}
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 
-            <label>Contraseña:</label>
-            <input type="password" name="contrasena" required minlength="6">
+    <h2>Crear nuevo usuario</h2>
+    <form method="post" action="/usuarios/crear" class="formulario-crear">
+        <label>Nombre:</label>
+        <input type="text" name="nombre" required>
 
-            <label>Rol:</label>
-            <select name="rol" required>
-                <option value="piloto">Piloto de Dron</option>
-                <option value="encargado">Encargado de Campo</option>
-                <option value="administrador">Administrador</option>
-            </select>
+        <label>Correo:</label>
+        <input type="email" name="correo" required>
 
-            <button type="submit">Crear usuario</button>
-        </form>
-    </div>
-</body>
-</html>
+        <label>Contraseña:</label>
+        <input type="password" name="contrasena" required minlength="6">
+
+        <label>Rol:</label>
+        <select name="rol" required>
+            <option value="piloto">Piloto de Dron</option>
+            <option value="encargado">Encargado de Campo</option>
+            <option value="administrador">Administrador</option>
+        </select>
+
+        <button type="submit">Crear usuario</button>
+    </form>
+{% endblock %}

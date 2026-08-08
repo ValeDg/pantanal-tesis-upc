@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block titulo %}PANTANAL{% endblock %}</title>
+    <link rel="stylesheet" href="/static/estilos.css">
+</head>
+<body>
+    <div class="layout">
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <span class="logo-icono">🌾</span>
+                <div>
+                    <div class="logo-texto">PANTANAL</div>
+                    <div class="logo-subtexto">Monitoreo Térmico</div>
+                </div>
+            </div>
+
+            <div class="sidebar-usuario">
+                <div class="avatar">{{ usuario.nombre[0] }}</div>
+                <div>
+                    <div class="usuario-nombre">{{ usuario.nombre }}</div>
+                    <div class="usuario-rol">{{ usuario.rol }}</div>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="/dashboard" class="{{ 'activo' if seccion_activa == 'dashboard' else '' }}">
+                    🏠 Dashboard
+                </a>
+                <a href="/monitoreos" class="{{ 'activo' if seccion_activa == 'monitoreos' else '' }}">
+                    📡 Monitoreos
+                </a>
+                {% if usuario.rol == "administrador" %}
+                <a href="/usuarios" class="{{ 'activo' if seccion_activa == 'usuarios' else '' }}">
+                    👥 Usuarios
+                </a>
+                {% endif %}
+            </nav>
+
+            <a href="/logout" class="sidebar-logout">🚪 Cerrar sesión</a>
+        </aside>
+
+        <main class="contenido-principal">
+            {% block contenido %}{% endblock %}
+        </main>
+    </div>
+</body>
+</html>

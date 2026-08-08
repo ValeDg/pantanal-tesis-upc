@@ -1,64 +1,55 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>PANTANAL - Detalle del Monitoreo</title>
-    <link rel="stylesheet" href="/static/estilos.css">
-</head>
-<body>
-    <div class="contenedor-ancho">
-        <div class="encabezado">
-            <h1>Monitoreo #{{ monitoreo.id_monitoreo }} - {{ monitoreo.nombre_cultivo }}</h1>
-            <a href="/monitoreos">← Volver a monitoreos</a>
-        </div>
+{% extends "base.html" %}
 
-        <p>Fecha: {{ monitoreo.fecha }}</p>
+{% block titulo %}Monitoreo #{{ monitoreo.id_monitoreo }}{% endblock %}
 
-        <div class="tarjeta-resumen">
-            <p><strong>Estado general:</strong> {{ resumen.estado_general }}</p>
-            <p><strong>Área afectada:</strong> {{ resumen.porcentaje_afectado }}%</p>
-            <p><strong>Nivel predominante:</strong> {{ resumen.nivel_predominante }}</p>
-            <p>🔴 Rojo: {{ resumen.conteos.rojo }} &nbsp; 🟠 Naranja: {{ resumen.conteos.naranja }} &nbsp; 🟢 Verde: {{ resumen.conteos.verde }}</p>
-        </div>
+{% block contenido %}
+    <a href="/monitoreos" class="boton-limpiar">← Volver a monitoreos</a>
+    <h1>Monitoreo #{{ monitoreo.id_monitoreo }} - {{ monitoreo.nombre_cultivo }}</h1>
+    <p>Fecha: {{ monitoreo.fecha }}</p>
 
-        <p class="texto-ayuda">Haz clic en la imagen para ampliarla</p>
-        <img src="/imagenes/{{ monitoreo.id_monitoreo }}" alt="Imagen procesada"
-             class="imagen-resultado" onclick="this.classList.toggle('ampliada')">
-
-        <h2>Detalle de anomalías detectadas</h2>
-        <div class="tabla-scroll">
-            <table class="tabla-usuarios">
-                <thead>
-                    <tr>
-                        <th>Nivel</th>
-                        <th>Coordenadas GPS</th>
-                        <th>Cantidad</th>
-                        <th>% dentro de su categoría</th>
-                        <th>Fecha</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for a in anomalias %}
-                    <tr>
-                        <td>
-                            {% if a.nivel == "rojo" %}🔴{% elif a.nivel == "naranja" %}🟠{% else %}🟢{% endif %}
-                            {{ a.nivel }}
-                        </td>
-                        <td>
-                            {% if a.latitud %}
-                                {{ "%.6f"|format(a.latitud) }}, {{ "%.6f"|format(a.longitud) }}
-                            {% else %}
-                                <span class="texto-ayuda">Sin GPS</span>
-                            {% endif %}
-                        </td>
-                        <td>{{ a.cantidad }}</td>
-                        <td>{{ a.porcentaje_categoria }}%</td>
-                        <td>{{ monitoreo.fecha }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+    <div class="tarjeta-resumen">
+        <p><strong>Estado general:</strong> {{ resumen.estado_general }}</p>
+        <p><strong>Área afectada:</strong> {{ resumen.porcentaje_afectado }}%</p>
+        <p><strong>Nivel predominante:</strong> {{ resumen.nivel_predominante }}</p>
+        <p>🔴 Rojo: {{ resumen.conteos.rojo }} &nbsp; 🟠 Naranja: {{ resumen.conteos.naranja }} &nbsp; 🟢 Verde: {{ resumen.conteos.verde }}</p>
     </div>
-</body>
-</html>
+
+    <p class="texto-ayuda">Haz clic en la imagen para ampliarla</p>
+    <img src="/imagenes/{{ monitoreo.id_monitoreo }}" alt="Imagen procesada"
+         class="imagen-resultado" onclick="this.classList.toggle('ampliada')">
+
+    <h2>Detalle de anomalías detectadas</h2>
+    <div class="tabla-scroll">
+        <table class="tabla-usuarios">
+            <thead>
+                <tr>
+                    <th>Nivel</th>
+                    <th>Coordenadas GPS</th>
+                    <th>Cantidad</th>
+                    <th>% dentro de su categoría</th>
+                    <th>Fecha</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for a in anomalias %}
+                <tr>
+                    <td>
+                        {% if a.nivel == "rojo" %}🔴{% elif a.nivel == "naranja" %}🟠{% else %}🟢{% endif %}
+                        {{ a.nivel }}
+                    </td>
+                    <td>
+                        {% if a.latitud %}
+                            {{ "%.6f"|format(a.latitud) }}, {{ "%.6f"|format(a.longitud) }}
+                        {% else %}
+                            <span class="texto-ayuda">Sin GPS</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ a.cantidad }}</td>
+                    <td>{{ a.porcentaje_categoria }}%</td>
+                    <td>{{ monitoreo.fecha }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

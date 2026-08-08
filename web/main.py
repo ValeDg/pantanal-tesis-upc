@@ -19,6 +19,9 @@ from modelos.cultivo import listar_cultivos
 
 from modelos.anomalia import obtener_resumen_monitoreo, listar_anomalias_de_monitoreo
 
+from modelos.anomalia import obtener_estadisticas_globales
+from modelos.monitoreo import listar_ultimos_monitoreos_con_ubicacion
+from modelos.cultivo import listar_cultivos
 
 app = FastAPI(title="PANTANAL Web")
 
@@ -83,15 +86,28 @@ def cerrar_sesion(request: Request):
 
 @app.get("/dashboard", response_class=HTMLResponse)
 def dashboard(request: Request, usuario=Depends(obtener_usuario_actual)):
-    return templates.TemplateResponse("dashboard.html", {"request": request, "usuario": usuario})
+    total_cultivos = len(listar_cultivos())
+    total_procesados = len(listar_monitoreos_procesados_filtrado())
+    conteos_anomalias = obtener_estadisticas_globales()
+    total_anomalias = sum(conteos_anomalias.values())
+    ultimos_monitoreos = listar_ultimos_monitoreos_con_ubicacion(5)
 
+    return templates.TemplateResponse(
+        "dashboard.html",
+        {
+            "request": request, "usuario": usuario, "seccion_activa": "dashboard",
+            "total_cultivos": total_cultivos, "total_procesados": total_procesados,
+            "total_anomalias": total_anomalias, "conteos_anomalias": conteos_anomalias,
+            "ultimos_monitoreos": ultimos_monitoreos,
+        }
+    )
 
 @app.get("/usuarios", response_class=HTMLResponse)
 def pagina_usuarios(request: Request, usuario=Depends(requerir_rol("administrador"))):
     lista = listar_usuarios()
     return templates.TemplateResponse(
         "usuarios.html",
-        {"request": request, "usuario": usuario, "usuarios": lista, "error": None}
+        {"request": request, "usuario": usuario, "usuarios": lista, "error": None, "seccion_activa": "usuarios"}
     )
 
 
@@ -109,7 +125,7 @@ def crear_usuario_ruta(
         return templates.TemplateResponse(
             "usuarios.html",
             {"request": request, "usuario": usuario, "usuarios": lista,
-             "error": "Ya existe un usuario con ese correo."}
+             "error": "Ya existe un usuario con ese correo.", "seccion_activa": "usuarios"}
         )
 
     crear_usuario(nombre, correo, generar_hash(contrasena), rol)
@@ -128,7 +144,7 @@ def pagina_monitoreos(
     id_cultivo: str = None,
     fecha_desde: str = None,
     fecha_hasta: str = None,
-    usuario=Depends(requerir_rol("encargado", "administrador")),
+    usuario=Depends(requerir_rol("piloto", "encargado", "administrador")),
 ):
     # Convertimos manualmente a int SOLO si viene un valor real (no vacío)
     id_cultivo_int = int(id_cultivo) if id_cultivo else None
@@ -141,6 +157,7 @@ def pagina_monitoreos(
         {
             "request": request, "usuario": usuario, "monitoreos": lista, "cultivos": cultivos,
             "filtro_cultivo": id_cultivo_int, "filtro_desde": fecha_desde, "filtro_hasta": fecha_hasta,
+            "seccion_activa": "monitoreos",
         }
     )
 
@@ -158,7 +175,7 @@ def detalle_monitoreo(request: Request, id_monitoreo: int,
     return templates.TemplateResponse(
         "detalle_monitoreo.html",
         {"request": request, "usuario": usuario, "monitoreo": monitoreo,
-         "resumen": resumen, "anomalias": anomalias}
+         "resumen": resumen, "anomalias": anomalias, "seccion_activa": "monitoreos"}
     )
 
 

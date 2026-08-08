@@ -1,25 +1,89 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>PANTANAL - Dashboard</title>
-    <link rel="stylesheet" href="/static/estilos.css">
-</head>
-<body>
-    <div class="contenedor">
-        <h1>Bienvenido, {{ usuario.nombre }}</h1>
-        <p>Rol: {{ usuario.rol }}</p>
+{% extends "base.html" %}
 
-        {% if usuario.rol in ["encargado", "administrador"] %}
-            <p><a href="/monitoreos">Ver monitoreos</a></p>
-        {% endif %}
+{% block titulo %}PANTANAL - Dashboard{% endblock %}
 
-        {% if usuario.rol == "administrador" %}
-            <p><a href="/usuarios">Gestionar usuarios</a></p>
-        {% endif %}
-        
+{% block contenido %}
+    <h1>¡Bienvenido, {{ usuario.nombre }}!</h1>
+    <p>Aquí tienes un resumen del sistema.</p>
 
-        <a href="/logout">Cerrar sesión</a>
+    <div class="grid-tarjetas">
+        <div class="tarjeta-stat">
+            <div class="valor">{{ total_cultivos }}</div>
+            <div class="etiqueta">🌱 Cultivos registrados</div>
+        </div>
+        <div class="tarjeta-stat">
+            <div class="valor">{{ total_procesados }}</div>
+            <div class="etiqueta">⚙️ Monitoreos procesados</div>
+        </div>
+        <div class="tarjeta-stat">
+            <div class="valor">{{ total_anomalias }}</div>
+            <div class="etiqueta">⚠️ Anomalías detectadas</div>
+        </div>
     </div>
-</body>
-</html>
+
+    <div class="grid-dos-columnas">
+        <div class="tarjeta-resumen">
+            <h2>Anomalías por Nivel</h2>
+            <canvas id="graficoAnomalias" width="300" height="300"></canvas>
+        </div>
+
+        <div class="tarjeta-resumen">
+            <h2>Mapa de Últimos Monitoreos</h2>
+            <div id="mapaMonitoreos" style="height: 300px; border-radius: 8px;"></div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+    <script>
+        // ---------- Gráfico de dona (Chart.js) ----------
+        const ctx = document.getElementById('graficoAnomalias');
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Rojo', 'Naranja', 'Verde'],
+                datasets: [{
+                    data: [
+                        {{ conteos_anomalias.rojo }},
+                        {{ conteos_anomalias.naranja }},
+                        {{ conteos_anomalias.verde }}
+                    ],
+                    backgroundColor: ['#e64545', '#f2994a', '#27ae60']
+                }]
+            },
+            options: {
+                plugins: { legend: { position: 'bottom' } }
+            }
+        });
+
+        // ---------- Mapa (Leaflet) ----------
+        const monitoreos = [
+            {% for m in ultimos_monitoreos %}
+                {% if m.latitud and m.longitud %}
+                {
+                    lat: {{ m.latitud }},
+                    lon: {{ m.longitud }},
+                    nombre: "{{ m.nombre_cultivo }} - {{ m.fecha }}"
+                },
+                {% endif %}
+            {% endfor %}
+        ];
+
+        if (monitoreos.length > 0) {
+            const mapa = L.map('mapaMonitoreos').setView([monitoreos[0].lat, monitoreos[0].lon], 14);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(mapa);
+
+            monitoreos.forEach(m => {
+                L.marker([m.lat, m.lon]).addTo(mapa).bindPopup(m.nombre);
+            });
+        } else {
+            document.getElementById('mapaMonitoreos').innerHTML =
+                '<p class="texto-ayuda">Aún no hay monitoreos con coordenadas GPS.</p>';
+        }
+    </script>
+{% endblock %}

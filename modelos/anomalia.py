@@ -100,3 +100,16 @@ def listar_anomalias_de_monitoreo(id_monitoreo: int):
         })
 
     return grupos_con_porcentaje
+
+def obtener_estadisticas_globales():
+    """Estadísticas agregadas de TODOS los monitoreos, para el dashboard."""
+    conexion = obtener_conexion()
+    cursor = conexion.cursor()
+
+    cursor.execute("SELECT nivel, COUNT(*) as cantidad FROM anomalias GROUP BY nivel")
+    conteos = {"rojo": 0, "naranja": 0, "verde": 0}
+    for fila in cursor.fetchall():
+        conteos[fila["nivel"]] = fila["cantidad"]
+
+    conexion.close()
+    return conteos

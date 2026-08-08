@@ -1,18 +1,12 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>PANTANAL - Monitoreos</title>
-    <link rel="stylesheet" href="/static/estilos.css">
-</head>
-<body>
-    <div class="contenedor-ancho">
-        <div class="encabezado">
-            <h1>Monitoreos Procesados</h1>
-            <a href="/dashboard">← Volver al dashboard</a>
-        </div>
+{% extends "base.html" %}
 
-        <form method="get" action="/monitoreos" class="formulario-filtro">
+{% block titulo %}PANTANAL - Monitoreos{% endblock %}
+
+{% block contenido %}
+    <h1>Monitoreos Procesados</h1>
+
+    <form method="get" action="/monitoreos" class="formulario-filtro">
+        <div>
             <label>Cultivo:</label>
             <select name="id_cultivo">
                 <option value="">Todos</option>
@@ -22,39 +16,39 @@
                     </option>
                 {% endfor %}
             </select>
-
+        </div>
+        <div>
             <label>Desde:</label>
             <input type="date" name="fecha_desde" value="{{ filtro_desde or '' }}">
-
+        </div>
+        <div>
             <label>Hasta:</label>
             <input type="date" name="fecha_hasta" value="{{ filtro_hasta or '' }}">
+        </div>
+        <button type="submit">Filtrar</button>
+        <a href="/monitoreos" class="boton-limpiar">Limpiar filtros</a>
+    </form>
 
-            <button type="submit">Filtrar</button>
-            <a href="/monitoreos" class="boton-limpiar">Limpiar filtros</a>
-        </form>
+    {% if monitoreos|length == 0 %}
+        <p class="texto-ayuda">No hay monitoreos que coincidan con los filtros seleccionados.</p>
+    {% endif %}
 
-        {% if monitoreos|length == 0 %}
-            <p class="texto-ayuda">No hay monitoreos que coincidan con los filtros seleccionados.</p>
-        {% endif %}
-
-        <table class="tabla-usuarios">
-            <thead>
-                <tr>
-                    <th>Fecha</th>
-                    <th>Cultivo</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for m in monitoreos %}
-                <tr>
-                    <td>{{ m.fecha }}</td>
-                    <td>{{ m.nombre_cultivo }}</td>
-                    <td><a href="/monitoreos/{{ m.id_monitoreo }}">Ver resultados →</a></td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-</body>
-</html>
+    <table class="tabla-usuarios">
+        <thead>
+            <tr>
+                <th>Fecha</th>
+                <th>Cultivo</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for m in monitoreos %}
+            <tr>
+                <td>{{ m.fecha }}</td>
+                <td>{{ m.nombre_cultivo }}</td>
+                <td><a href="/monitoreos/{{ m.id_monitoreo }}">Ver resultados →</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
